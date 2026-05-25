@@ -72,12 +72,18 @@ export default function Home() {
 
   function selectMember(memberId: MemberId) {
     setActiveMember(memberId);
-    window.location.href = `/?member=${memberId}&folder=${activeFolder}`;
+    const params = new URLSearchParams(window.location.search);
+    params.set("member", memberId);
+    params.set("folder", activeFolder);
+    window.history.replaceState(null, "", `?${params.toString()}`);
   }
 
   function selectFolder(folderId: FolderId) {
     setActiveFolder(folderId);
-    window.location.href = `/?member=${activeMember}&folder=${folderId}`;
+    const params = new URLSearchParams(window.location.search);
+    params.set("member", activeMember);
+    params.set("folder", folderId);
+    window.history.replaceState(null, "", `?${params.toString()}`);
   }
 
   function persist(nextDocs: SavedDoc[]) {
