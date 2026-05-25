@@ -22,6 +22,13 @@ type UploadItem = {
   error?: string;
 };
 
+type GoogleUser = {
+  email?: string;
+  name?: string;
+  picture?: string;
+  scope?: string;
+};
+
 const storageKey = "nbai-next-docs";
 
 export default function Home() {
@@ -35,6 +42,8 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [progress, setProgress] = useState(0);
+  const [googleUser, setGoogleUser] = useState<GoogleUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const member = findMember(activeMember);
   const folder = findFolder(activeFolder);
@@ -47,6 +56,18 @@ export default function Home() {
     const folderParam = params.get("folder") as FolderId | null;
     if (memberParam && members.some((item) => item.id === memberParam)) setActiveMember(memberParam);
     if (folderParam && folders.some((item) => item.id === folderParam)) setActiveFolder(folderParam);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((result) => {
+        if (result?.loggedIn) setGoogleUser(result.user);
+      })
+      .finally(() => setAuthChecked(true));
   }, []);
 
   function selectMember(memberId: MemberId) {
@@ -93,6 +114,11 @@ export default function Home() {
       });
       const result = await response.json();
       if (response.status === 401) {
+        window.location.href = "/api/auth/google";
+        return;
+      }
+      if (response.status === 403 && result.reauth) {
+        setStatus("Google token chưa có quyền Drive. Đang yêu cầu đăng nhập lại để cấp quyền upload...");
         window.location.href = "/api/auth/google";
         return;
       }
@@ -155,8 +181,23 @@ export default function Home() {
           </div>
         </div>
         <div className="top-actions">
-          <a className="link-button ghost" href="/api/auth/me">Kiểm tra login</a>
-          <a className="link-button" href="/api/auth/google">Đăng nhập Google</a>
+          {googleUser ? (
+            <div className="user-chip">
+              {googleUser.picture ? <img src={googleUser.picture} alt="" /> : null}
+              <div>
+                <strong>{googleUser.name || "Google account"}</strong>
+                <span>{googleUser.email}</span>
+              </div>
+            </div>
+          ) : (
+            <span className="auth-hint">{authChecked ? "Chưa đăng nhập" : "Đang kiểm tra..."}</span>
+          )}
+          {googleUser ? (
+            <a className="link-button ghost" href="/api/auth/logout">Đăng xuất</a>
+          ) : null}
+          <a className="link-button" href="/api/auth/google">
+            {googleUser ? "Cấp lại quyền Drive" : "Đăng nhập Google"}
+          </a>
         </div>
       </header>
 

@@ -78,8 +78,19 @@ export async function POST(request: Request) {
       }))
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Upload failed.";
+    if (message.includes("ACCESS_TOKEN_SCOPE_INSUFFICIENT") || message.includes("insufficient authentication scopes")) {
+      return NextResponse.json(
+        {
+          ok: false,
+          reauth: true,
+          error: "Google token chưa có quyền Drive. Vui lòng bấm Cấp lại quyền Drive và đồng ý quyền truy cập Drive."
+        },
+        { status: 403 }
+      );
+    }
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "Upload failed." },
+      { ok: false, error: message },
       { status: 500 }
     );
   }

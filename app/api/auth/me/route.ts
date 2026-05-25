@@ -13,7 +13,8 @@ export async function GET() {
     user: {
       email: token.email,
       name: token.name,
-      picture: token.picture
+      picture: token.picture,
+      scope: token.scope
     }
   });
 }
