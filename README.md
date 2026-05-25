@@ -94,23 +94,19 @@ The folder ID is:
 ## GitHub + Vercel Deploy
 
 1. Create a GitHub repo.
-2. Push the `NBAI Intranet` app to GitHub.
+2. Push this repo to GitHub.
 3. Import the repo in Vercel.
 4. Set the environment variables above in Vercel.
 5. Deploy.
 6. Add the deployed callback URL to Google OAuth credentials.
 7. Redeploy after changing env vars.
 
-If this app lives inside a larger repo, set Vercel `Root Directory` to:
-
-```text
-NBAI Intranet
-```
+Set Vercel `Root Directory` to empty/default because the Next.js app now lives at the repo root.
 
 Basic Git commands from the workspace root:
 
 ```bash
-git add "NBAI Intranet"
+git add .
 git commit -m "Add NBAI Intranet Next.js app"
 git push
 ```
